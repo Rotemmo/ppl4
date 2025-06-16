@@ -53,18 +53,19 @@
 (define append$
   (lambda (lst1 lst2 cont)
     (if (empty? lst1)
-      (cony lst2)
-      (cons (car lst1)
-    (append$ (cdr lst1) lst2 cont)))))  
+      (cont lst2)
+      (append$ (cdr lst1) lst2  (lambda (res) (cont (cons (car lst1) res)))))))
+
 
 
 ;;; Q3.2
 ; Signature: equal-trees$(tree1, tree2, succ, fail) 
-; Type: [Tree * Tree * [Tree ->T1] * [Pair->T2] -> T1 U T2
+; Type: [Tree * Tree * [Tree ->T1] * [Pair->T2]] -> T1 U T2
 ; Purpose: Determines the structure identity of a given two lists, with post-processing succ/fail
 (define equal-trees$ 
   (lambda (tree1 tree2 succ fail)
-    #f ;@TODO
+    (if(empty ? tree1) (if (empty ? lst 2)) succ fail)
+    equal-trees$ (cdr tree1 cdr tree2 succ fail)
   )
 )
 
