@@ -1,6 +1,9 @@
 import { expect, assert } from 'chai';
 import { all, Fib1, Fib2 } from '../ex4';
 
+
+console.log("Running ex4 tests...");
+
 //Q1
 function p1() { // always succeeds, with content 1
   return new Promise((resolve, reject) => {
