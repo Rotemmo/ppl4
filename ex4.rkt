@@ -49,11 +49,14 @@
 ; Signature: append$(lst1, lst2, cont) 
 ; Type: [List * List * [List -> T]] -> T
 ; Purpose: Returns the concatination of the given two lists, with cont pre-processing
+
 (define append$
   (lambda (lst1 lst2 cont)
-    #f ;@TODO
-  )
-)
+    (if (empty? lst1)
+      (cony lst2)
+      (cons (car lst1)
+    (append$ (cdr lst1) lst2 cont)))))  
+
 
 ;;; Q3.2
 ; Signature: equal-trees$(tree1, tree2, succ, fail) 
