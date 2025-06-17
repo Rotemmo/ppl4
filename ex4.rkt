@@ -103,9 +103,8 @@
 ;; constant real number
 (define as-real
   (lambda (x)
-    #f ;@TODO
-  )
-)
+    (cons-lzl x (lambda () (as-real x)))))
+
 
 
 ;; Signature: ++(x, y)
@@ -113,35 +112,32 @@
 ;; Purpose: Addition of real numbers
 (define ++
   (lambda (x y)
-    #f ;@TODO
-  )
-)
+    (cons-lzl (+ (head x) (head y))
+              (lambda () (++ (tail x) (tail y))))))
 
 ;; Signature: --(x, y)
 ;; Type: [ Lzl(Number) * Lzl(Number) -> Lzl(Number) ]
 ;; Purpose: Subtraction of real numbers
 (define --
   (lambda (x y)
-    #f ;@TODO
-  )
-)
+    (cons-lzl (- (head x) (head y))
+              (lambda () (-- (tail x) (tail y))))))
 
 ;; Signature: **(x, y)
 ;; Type: [ Lzl(Number) * Lzl(Number) -> Lzl(Number) ]
 ;; Purpose: Multiplication of real numbers
 (define **
   (lambda (x y)
-    #f ;@TODO
-  )
-)
+    (cons-lzl (* (head x) (head y))
+              (lambda () (** (tail x) (tail y))))))
 ;; Signature: //(x, y)
 ;; Type: [ Lzl(Number) * Lzl(Number) -> Lzl(Number) ]
 ;; Purpose: Division of real numbers
 (define //
   (lambda (x y)
-    #f ;@TODO
-  )
-)
+    (cons-lzl (/ (head x) (head y))
+              (lambda () (// (tail x) (tail y))))))
+
 
 ;;; Q4.2.a
 ;; Signature: sqrt-with(x y)
@@ -151,9 +147,13 @@
 ;; square root of `x`
 (define sqrt-with
   (lambda (x y)
-    #f ;@TODO
-  )
-)
+    (let* (
+            (x-div-y (// x y))
+            (numer (++ y x-div-y))
+            (next (// numer (as-real 2)))
+          )
+      (cons-lzl y
+        (lambda () (sqrt-with x next))))))
 
 ;;; Q4.2.b
 ;; Signature: diag(lzl)
@@ -161,9 +161,8 @@
 ;; Purpose: Diagonalize an infinite lazy list
 (define diag
   (lambda (lzl)
-    #f ;@TODO
-  )
-)
+    (cons-lzl (head (head lzl))
+              (lambda () (diag (tail (map-lzl tail lzl)))))))
 
 ;;; Q4.2.c
 ;; Signature: rsqrt(x)
@@ -172,6 +171,62 @@
 ;; Example: (take (rsqrt (as-real 4.0)) 6) => '(4.0 2.5 2.05 2.0006097560975613 2.0000000929222947 2.000000000000002)
 (define rsqrt
   (lambda (x)
-    #f ;@TODO
-  )
-)
+    (diag (sqrt-with x x))))
+
+
+
+
+;;; ================================
+;;; Chatty tests
+;;; ================================
+
+(displayln "===== Q4.1: Lazy List Arithmetic =====")
+
+(displayln (take (as-real 5) 5))
+;; Expected: '(5 5 5 5 5)
+
+(displayln (take (++ (as-real 4) (as-real 3)) 6))
+;; Expected: '(7 7 7 7 7 7)
+
+(displayln (take (-- (integers-from 10) (integers-from 2)) 5))
+;; Expected: '(8 8 8 8 8)
+
+(displayln (take (** (integers-from 2) (integers-from 3)) 4))
+;; Expected: '(6 15 28 45)
+
+(displayln (take (// (integers-from 10) (integers-from 1)) 5))
+;; Expected: '(10 11/2 4 13/4 14/5)
+
+
+(displayln "===== Q4.2.a: sqrt-with (lazy list of lazy lists) =====")
+
+(define approx-lists (sqrt-with (as-real 4.0) (as-real 1.0)))
+(displayln (map (lambda (lz n) (take lz n))
+     (take approx-lists 3)
+     (list 5 5 5)))
+;; Expected: 3 inner lists getting closer to sqrt(4)
+
+
+(displayln "===== Q4.2.b: diag (diagonalization) =====")
+
+(define fake-matrix
+  (cons-lzl (as-real 1)
+    (lambda () (cons-lzl (as-real 2)
+      (lambda () (cons-lzl (as-real 3)
+        (lambda () (cons-lzl (as-real 4)
+          (lambda () fake-matrix)))))))))
+
+(displayln (take (diag fake-matrix) 5))
+;; Expected: '(1 2 3 4 5)
+
+
+(displayln "===== Q4.2.c: rsqrt (final square root) =====")
+
+(displayln (take (rsqrt (as-real 4.0)) 6))
+;; Expected: '(4.0 2.5 2.05 2.0006097560975613 2.0000000929222947 2.000000000000002)
+
+(displayln (take (rsqrt (as-real 2.0)) 6))
+;; Expected: approx '(2.0 1.5 1.416666... ...)
+
+(displayln (take (rsqrt (as-real 9.0)) 6))
+;; Expected: approx '(9.0 5.0 3.4 3.0235... ...)
