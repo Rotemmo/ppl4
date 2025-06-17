@@ -62,12 +62,36 @@
 ; Signature: equal-trees$(tree1, tree2, succ, fail) 
 ; Type: [Tree * Tree * [Tree ->T1] * [Pair->T2]] -> T1 U T2
 ; Purpose: Determines the structure identity of a given two lists, with post-processing succ/fail
-(define equal-trees$ 
-  (lambda (tree1 tree2 succ fail)
-    (if(empty ? tree1) (if (empty ? lst 2)) succ fail)
-    equal-trees$ (cdr tree1 cdr tree2 succ fail)
-  )
-)
+
+
+(define equal-trees$
+  (lambda (t1 t2 succ fail)
+    (cond
+      [(and (null? t1) (null? t2))
+       (succ '())]
+
+      [(or  (null? t1)
+            (null? t2))
+       (fail (append t1 t2))]
+
+      [(and (not (list? t1)) (not (list? t2)))
+       (succ (cons t1 t2))]
+
+      [(not (list? t1))
+       (fail (append (list t1) t2))]
+      [(not (list? t2))
+       (fail (append t1 (list t2)))]
+
+      [else
+       (equal-trees$
+         (car t1) (car t2)
+         (lambda (head-res)
+           (equal-trees$
+             (cdr t1) (cdr t2)
+             (lambda (tail-res)
+               (succ (cons head-res tail-res)))
+             fail))
+         fail)])))
 
 
 
